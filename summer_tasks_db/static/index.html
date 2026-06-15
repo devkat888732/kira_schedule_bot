@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAS — база задач</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CjxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjgiIGZpbGw9IiM1MzRBQjciLz4KPHRleHQgeD0iMTYiIHk9IjIyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI0UxRjVFRSI+0Jo8L3RleHQ+CjxwYXRoIGQ9Ik02IDEwIEM4IDcsIDEyIDcsIDEzIDEwIEMxNCAxMywgMTEgMTYsIDEzIDE4IEMxNSAyMCwgMTkgMTksIDIwIDIxIEMyMSAyMywgMjAgMjYsIDIyIDI3IiBzdHJva2U9IiMxRDlFNzUiIHN0cm9rZS13aWR0aD0iMi41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz4KPC9zdmc+Cg==">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#111110;--surface:#1c1c1a;--surface2:#252523;--surface3:#2e2e2b;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);--border3:rgba(255,255,255,0.25);
+  --text:#e8e8e4;--muted:#888884;--hint:#555552;
+  --accent:#1D9E75;--accent-dim:#5DCAA5;--accent-l:#04342C;
+  --purple:#7F77DD;--purple-l:#26215C;
+  --amber:#EF9F27;--amber-l:#412402;
+  --red:#E05555;--red-l:#3D1010;
+  --green:#5CB85C;--green-l:#0F2E0F;
+  --p-high-bg:#3D1010;--p-high-c:#F08080;
+  --p-mid-bg:#412402;--p-mid-c:#FAC775;
+  --p-low-bg:#0a2a1a;--p-low-c:#5DCAA5;
+  --s-todo-bg:#1c1c1a;--s-todo-c:#888884;
+  --s-wip-bg:#1A2640;--s-wip-c:#7AACEE;
+  --s-done-bg:#0F2E0F;--s-done-c:#5CB85C;
+  --s-blocked-bg:#3D1010;--s-blocked-c:#F08080;
+  --tag-bg:#252540;--tag-c:#9B97E8;
+}
+@media(prefers-color-scheme:light){
+  :root{
+    --bg:#f5f4f0;--surface:#ffffff;--surface2:#f0efeb;--surface3:#e8e7e2;
+    --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);--border3:rgba(0,0,0,0.25);
+    --text:#1c1c19;--muted:#6e6e6a;--hint:#b0b0ac;
+    --accent:#1D9E75;--accent-dim:#0F6E56;--accent-l:#E1F5EE;
+    --purple:#534AB7;--purple-l:#EEEDFE;
+    --amber:#BA7517;--amber-l:#FAEEDA;
+    --red:#C0392B;--red-l:#FDECEC;
+    --green:#2E7D32;--green-l:#EAF3DE;
+    --p-high-bg:#FDECEC;--p-high-c:#C0392B;
+    --p-mid-bg:#FAEEDA;--p-mid-c:#A0620D;
+    --p-low-bg:#E1F5EE;--p-low-c:#0F6E56;
+    --s-todo-bg:#f0efeb;--s-todo-c:#6e6e6a;
+    --s-wip-bg:#E6F1FB;--s-wip-c:#185FA5;
+    --s-done-bg:#EAF3DE;--s-done-c:#2E7D32;
+    --s-blocked-bg:#FDECEC;--s-blocked-c:#C0392B;
+    --tag-bg:#EEEDFE;--tag-c:#534AB7;
+  }
+}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.main{flex:1;padding:32px;max-width:960px;}
+@media(max-width:800px){
+  .layout{flex-direction:column;}
+  .sidebar{width:100%;height:auto;max-height:50vh;position:static;border-right:none;border-bottom:1px solid var(--border);}
+  .main{padding:16px;}
+}
+.logo{padding:8px 10px 16px;border-bottom:1px solid var(--border);margin-bottom:12px;}
+.logo-title{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+
+.sidebar-section{margin-bottom:4px;}
+.sidebar-section-header{display:flex;align-items:center;gap:8px;padding:10px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);cursor:pointer;border-radius:6px;transition:background .15s;user-select:none;}
+.sidebar-section-header:hover{background:var(--surface2);}
+.section-count{margin-left:auto;font-size:10px;background:var(--surface2);padding:2px 6px;border-radius:10px;}
+.section-arrow{font-size:10px;transition:transform .2s;}
+.sidebar-section-body{display:flex;flex-direction:column;gap:2px;padding-left:8px;overflow:hidden;max-height:600px;transition:max-height .3s,opacity .2s;}
+.sidebar-section-body:not(.open){max-height:0;opacity:0;pointer-events:none;}
+
+.filter-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;background:none;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);text-align:left;width:100%;transition:all .15s;}
+.filter-btn:hover{background:var(--surface2);color:var(--text);}
+.filter-btn.active{background:var(--accent-l);color:var(--accent-dim);}
+.filter-icon{width:16px;text-align:center;font-size:11px;}
+.filter-btn .cnt{margin-left:auto;font-size:10px;opacity:.6;}
+.filter-btn.add-btn{color:var(--accent);border:1px dashed var(--border2);margin-top:4px;}
+.filter-btn.add-btn:hover{border-color:var(--accent);background:var(--accent-l);}
+
+.filter-submenu{margin-top:4px;}
+.filter-submenu-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font-size:11px;color:var(--hint);cursor:pointer;border-radius:4px;}
+.filter-submenu-header:hover{background:var(--surface2);color:var(--muted);}
+.submenu-arrow{font-size:9px;}
+.filter-submenu-body{display:none;flex-direction:column;gap:2px;padding-left:8px;margin-top:4px;}
+.filter-submenu-body.open{display:flex;}
+
+.sidebar-project,.sidebar-type{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;}
+.sidebar-project:hover,.sidebar-type:hover{background:var(--surface2);color:var(--text);}
+.sidebar-project.active{background:var(--purple-l);color:var(--purple);}
+.sidebar-type.active{background:var(--accent-l);color:var(--accent-dim);}
+.sidebar-project-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sidebar-project-name,.sidebar-type-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-project-count,.sidebar-type-count{font-size:10px;opacity:.6;}
+
+.sidebar-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);}
+
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+.page-title{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;}
+.page-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.btn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;padding:9px 18px;border-radius:8px;cursor:pointer;border:none;transition:opacity .15s,transform .08s;display:inline-flex;align-items:center;gap:7px;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{opacity:.88;}
+.btn-ghost{background:none;border:1px solid var(--border2);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--border3);color:var(--text);}
+.btn-danger{background:none;border:1px solid var(--border2);color:var(--red);}
+.btn-danger:hover{background:var(--red-l);border-color:var(--red);}
+.btn-red{background:var(--red);color:#fff;}
+
+.export-dropdown{position:relative;display:inline-block;}
+.export-menu{position:absolute;top:100%;right:0;margin-top:4px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 0;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:60;display:none;}
+.export-menu.open{display:block;}
+.export-menu-item{padding:10px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background .15s;}
+.export-menu-item:hover{background:var(--surface2);}
+
+.stats-bar{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
+.stat-card{flex:1;min-width:80px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.stat-n{font-family:'Unbounded',sans-serif;font-size:22px;font-weight:700;color:var(--accent);}
+.stat-l{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;}
+
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.search-wrap{position:relative;flex:1;min-width:160px;}
+.search-wrap input{width:100%;padding:9px 12px 9px 34px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .15s;}
+.search-wrap input:focus{border-color:var(--accent);}
+.search-wrap input::placeholder{color:var(--hint);}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--hint);}
+.sel{padding:9px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;cursor:pointer;}
+
+.tag-filter-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.tag-chip{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);cursor:pointer;transition:all .15s;}
+.tag-chip:hover{background:var(--tag-bg);color:var(--tag-c);}
+.tag-chip.active{background:var(--tag-bg);color:var(--tag-c);border-color:var(--purple);}
+
+.task-list{display:flex;flex-direction:column;gap:6px;}
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:8px;transition:border-color .15s;}
+.task-card:hover{border-color:var(--border2);}
+.task-card.done-card{opacity:.55;}
+.task-card.done-card .task-title{text-decoration:line-through;color:var(--muted);}
+.task-title{font-size:14px;font-weight:500;line-height:1.4;}
+.task-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;align-items:center;}
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;cursor:default;}
+.badge.clickable{cursor:pointer;}
+.b-high{background:var(--p-high-bg);color:var(--p-high-c);}
+.b-mid{background:var(--p-mid-bg);color:var(--p-mid-c);}
+.b-low{background:var(--p-low-bg);color:var(--p-low-c);}
+.b-todo{background:var(--s-todo-bg);color:var(--s-todo-c);border:1px solid var(--border);}
+.b-wip{background:var(--s-wip-bg);color:var(--s-wip-c);}
+.b-done{background:var(--s-done-bg);color:var(--s-done-c);}
+.b-blocked{background:var(--s-blocked-bg);color:var(--s-blocked-c);}
+.b-tag{background:var(--tag-bg);color:var(--tag-c);}
+.task-deadline{font-size:11px;color:var(--muted);}
+.task-deadline.overdue{color:var(--red);}
+.task-notes-preview{font-size:11px;color:var(--hint);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:500px;}
+.task-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--hint);padding:4px;border-radius:5px;transition:color .15s,background .15s;display:flex;align-items:center;}
+.icon-btn:hover{color:var(--text);background:var(--surface2);}
+.icon-btn.del:hover{color:var(--red);}
+
+.task-checklist{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.task-checklist-title{font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.task-checklist-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--muted);cursor:pointer;transition:color .15s;}
+.task-checklist-item:hover{color:var(--text);}
+.task-checklist-item.checked{text-decoration:line-through;opacity:.5;}
+.task-checkbox{width:16px;height:16px;border:2px solid var(--border2);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.task-checkbox.checked{background:var(--accent);border-color:var(--accent);}
+.task-checkbox svg{opacity:0;}
+.task-checkbox.checked svg{opacity:1;}
+.checklist-progress{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.checklist-progress-bar{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.checklist-progress-fill{height:100%;background:var(--accent);transition:width .3s;}
+.checklist-progress-text{font-size:10px;color:var(--hint);min-width:36px;text-align:right;}
+
+.tag-input-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;cursor:text;min-height:42px;align-items:center;}
+.tag-input-wrap:focus-within{border-color:var(--accent);}
+.tag-pill{display:inline-flex;align-items:center;gap:4px;background:var(--tag-bg);color:var(--tag-c);font-size:11px;padding:2px 8px;border-radius:20px;}
+.tag-pill button{background:none;border:none;cursor:pointer;color:var(--tag-c);opacity:.7;font-size:13px;line-height:1;padding:0;}
+.tag-pill button:hover{opacity:1;}
+.tag-input-wrap input{border:none;background:none;outline:none;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);min-width:80px;flex:1;}
+.tag-input-wrap input::placeholder{color:var(--hint);}
+
+.checklist-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;margin-bottom:6px;font-size:12px;}
+.checklist-item button{background:none;border:none;color:var(--hint);cursor:pointer;padding:2px;display:flex;}
+.checklist-item button:hover{color:var(--red);}
+.drag-handle{color:var(--hint);cursor:grab;padding:0 4px;}
+
+.project-list,.bug-list{display:flex;flex-direction:column;gap:8px;}
+.project-card,.bug-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .15s;}
+.project-card:hover,.bug-card:hover{border-color:var(--border2);}
+.project-card.completed,.bug-card.fixed{opacity:.6;}
+.project-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.project-name,.bug-title{font-size:14px;font-weight:500;}
+.project-meta,.bug-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center;}
+.project-desc,.bug-desc{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;}
+.project-progress{margin-top:12px;}
+.progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:3px;}
+.progress-text{font-size:10px;color:var(--muted);margin-top:4px;}
+.project-tasks-preview{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.mini-task{font-size:12px;color:var(--muted);padding:3px 0;display:flex;align-items:center;gap:6px;}
+.mini-task.done{text-decoration:line-through;opacity:.5;}
+
+.type-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.type-card:hover{border-color:var(--border2);}
+.type-icon{font-size:20px;}
+.type-info{flex:1;}
+.type-name{font-size:14px;font-weight:500;}
+.type-meta{font-size:11px;color:var(--hint);margin-top:4px;}
+
+.color-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s,border-color .15s;}
+.color-dot:hover{transform:scale(1.1);}
+.color-dot.selected{border-color:var(--text);}
+
+.emoji-picker{display:flex;gap:6px;flex-wrap:wrap;}
+.emoji-opt{font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;border:2px solid transparent;}
+.emoji-opt:hover{background:var(--surface2);}
+.emoji-opt.selected{border-color:var(--accent);background:var(--accent-l);}
+
+.fab{position:fixed;bottom:28px;right:28px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .15s;}
+.fab:hover{transform:scale(1.08);}
+
+.empty{text-align:center;padding:60px 20px;color:var(--hint);}
+.empty-icon{font-size:36px;margin-bottom:12px;}
+.empty-txt{font-size:13px;}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:100%;max-width:520px;transform:translateY(16px);transition:transform .2s;max-height:90vh;overflow-y:auto;}
+.overlay.open .modal{transform:translateY(0);}
+.modal-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;margin-bottom:20px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;transition:border-color .15s;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
+.field textarea{resize:vertical;min-height:80px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;}
+
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.confirm-overlay.open{opacity:1;pointer-events:all;}
+.confirm-box{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:24px;width:100%;max-width:360px;}
+.confirm-title{font-size:14px;font-weight:500;margin-bottom:8px;}
+.confirm-txt{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.confirm-footer{display:flex;gap:8px;justify-content:flex-end;}
+
+@media(max-width:480px){
+  .field-row{grid-template-columns:1fr;}
+  .task-card{grid-template-columns:1fr;}
+  .task-actions{flex-direction:row;}
+}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface3);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:8px;font-size:12px;z-index:300;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-title">SAS DB</div>
+      <div class="logo-sub">задачи 2026</div>
+    </div>
+
+    <!-- Проекты — первая секция -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-header" onclick="toggleSection('projects')">
+        <span>📁 Проекты</span>
+        <span class="section-count" id="cnt-projects">0</span>
+        <span class="section-arrow" id="arrow-projects">▾</span>
+      </div>
+      <div class="sidebar-section-body open" id="section-projects">
+        <div id="sidebar-projects-list"></div>
+        <button class="filter-btn add-btn" onclick="openProjectModal()">
+          <span class="filter-icon">+</span><span>новый проект</span>
+        </button>
+        <button class="filter-btn" onclick="openPanel('projects')" id="f-projects-manage">
+          <span class="filter-icon">⚙</span><span>управление</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Задачи — вторая секция -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-header" onclick="toggleSection('tasks')">
+        <span>📋 Задачи</span>
+        <span class="section-count" id="cnt-all-tasks">0</span>
+        <span class="section-arrow" id="arrow-tasks">▾</span>
+      </div>
+      <div class="sidebar-section-body open" id="section-tasks">
+        <button class="filter-btn active" onclick="setFilter('status','all')" id="f-all">
+          <span class="filter-icon">◉</span><span>все</span><span class="cnt" id="cnt-all">0</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('status','todo')" id="f-todo">
+          <span class="filter-icon" style="color:var(--muted)">○</span><span>не начато</span><span class="cnt" id="cnt-todo">0</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('status','wip')" id="f-wip">
+          <span class="filter-icon" style="color:var(--s-wip-c)">◐</span><span>в работе</span><span class="cnt" id="cnt-wip">0</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('status','done')" id="f-done">
+          <span class="filter-icon" style="color:var(--green)">●</span><span>готово</span><span class="cnt" id="cnt-done">0</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('status','blocked')" id="f-blocked">
+          <span class="filter-icon" style="color:var(--red)">⊘</span><span>заблокировано</span><span class="cnt" id="cnt-blocked">0</span>
+        </button>
+        <div class="filter-submenu">
+          <div class="filter-submenu-header" onclick="toggleSubmenu('priority')">
+            <span>по приоритету</span><span class="submenu-arrow" id="arrow-priority">▸</span>
+          </div>
+          <div class="filter-submenu-body" id="submenu-priority">
+            <button class="filter-btn" onclick="setFilter('priority','high')" id="f-high">
+              <span class="filter-icon" style="color:var(--red)">▲</span><span>высокий</span><span class="cnt" id="cnt-high">0</span>
+            </button>
+            <button class="filter-btn" onclick="setFilter('priority','mid')" id="f-mid">
+              <span class="filter-icon" style="color:var(--amber)">◆</span><span>средний</span><span class="cnt" id="cnt-mid">0</span>
+            </button>
+            <button class="filter-btn" onclick="setFilter('priority','low')" id="f-low">
+              <span class="filter-icon" style="color:var(--green)">▼</span><span>низкий</span><span class="cnt" id="cnt-low">0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Типы — третья секция -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-header" onclick="toggleSection('types')">
+        <span>🏷️ Типы</span>
+        <span class="section-count" id="cnt-types">0</span>
+        <span class="section-arrow" id="arrow-types">▾</span>
+      </div>
+      <div class="sidebar-section-body open" id="section-types">
+        <div id="sidebar-types-list"></div>
+        <button class="filter-btn add-btn" onclick="openTypeModal()">
+          <span class="filter-icon">+</span><span>новый тип</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Трекер — четвёртая секция -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-header" onclick="toggleSection('tracker')">
+        <span>🐛 Трекер</span>
+        <span class="section-count" id="cnt-tracker">0</span>
+        <span class="section-arrow" id="arrow-tracker">▾</span>
+      </div>
+      <div class="sidebar-section-body open" id="section-tracker">
+        <button class="filter-btn" onclick="openPanel('tracker')" id="f-tracker">
+          <span class="filter-icon">◉</span><span>все</span><span class="cnt" id="cnt-tracker-all">0</span>
+        </button>
+        <button class="filter-btn" onclick="openPanel('tracker');setTimeout(()=>setTrackerFilter('bug'),50)">
+          <span class="filter-icon" style="color:var(--red)">🐛</span><span>баги</span><span class="cnt" id="cnt-bugs">0</span>
+        </button>
+        <button class="filter-btn" onclick="openPanel('tracker');setTimeout(()=>setTrackerFilter('update'),50)">
+          <span class="filter-icon" style="color:var(--purple)">💡</span><span>апдейты</span><span class="cnt" id="cnt-updates">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="filter-btn" onclick="openPanel('types-manage')">
+        <span class="filter-icon">🏷️</span><span>управление типами</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <!-- Панель задач -->
+    <div class="tab-panel" id="panel-tasks">
+      <div class="page-header">
+        <div>
+          <div class="page-title">База задач SAS</div>
+          <div class="page-sub" id="filter-label">все задачи</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="openModal()">+ добавить</button>
+        </div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-card"><div class="stat-n" id="s-total">0</div><div class="stat-l">всего</div></div>
+        <div class="stat-card"><div class="stat-n" id="s-wip" style="color:var(--purple)">0</div><div class="stat-l">в работе</div></div>
+        <div class="stat-card"><div class="stat-n" id="s-done" style="color:var(--green)">0</div><div class="stat-l">готово</div></div>
+        <div class="stat-card"><div class="stat-n" id="s-blocked" style="color:var(--red)">0</div><div class="stat-l">блок</div></div>
+      </div>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-input" placeholder="поиск..." oninput="debounceLoad()">
+        </div>
+        <select class="sel" id="sort-sel" onchange="loadTasks()">
+          <option value="created_desc">по дате ↓</option>
+          <option value="priority">по приоритету</option>
+          <option value="deadline">по дедлайну</option>
+          <option value="title">по названию</option>
+        </select>
+      </div>
+      <div class="tag-filter-wrap" id="tag-filter-wrap"></div>
+      <div class="task-list" id="task-list"></div>
+    </div>
+
+    <!-- Панель трекера -->
+    <div class="tab-panel" id="panel-tracker">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Трекер</div>
+          <div class="page-sub" id="tracker-sub">баги и апдейты</div>
+        </div>
+        <button class="btn btn-primary" onclick="openTrackerAddModal()">+ добавить</button>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-card"><div class="stat-n" id="tr-total">0</div><div class="stat-l">всего</div></div>
+        <div class="stat-card"><div class="stat-n" id="tr-bugs" style="color:var(--red)">0</div><div class="stat-l">багов</div></div>
+        <div class="stat-card"><div class="stat-n" id="tr-updates" style="color:var(--purple)">0</div><div class="stat-l">апдейтов</div></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:14px;">
+        <span class="tag-chip active" id="tf-all" onclick="setTrackerFilter('all')">все</span>
+        <span class="tag-chip" id="tf-bug" onclick="setTrackerFilter('bug')">🐛 баги</span>
+        <span class="tag-chip" id="tf-update" onclick="setTrackerFilter('update')">💡 апдейты</span>
+      </div>
+      <div class="bug-list" id="tracker-list"></div>
+    </div>
+
+    <!-- Панель проектов -->
+    <div class="tab-panel active" id="panel-projects">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Проекты</div>
+          <div class="page-sub">управление проектами</div>
+        </div>
+        <button class="btn btn-primary" onclick="openProjectModal()">+ новый проект</button>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-card"><div class="stat-n" id="pr-total">0</div><div class="stat-l">всего</div></div>
+        <div class="stat-card"><div class="stat-n" id="pr-active" style="color:var(--accent)">0</div><div class="stat-l">активных</div></div>
+        <div class="stat-card"><div class="stat-n" id="pr-completed" style="color:var(--green)">0</div><div class="stat-l">завершено</div></div>
+      </div>
+      <div class="project-list" id="project-list"></div>
+    </div>
+
+    <!-- Панель управления типами -->
+    <div class="tab-panel" id="panel-types-manage">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Типы задач</div>
+          <div class="page-sub">создавайте типы с шаблонными чеклистами</div>
+        </div>
+        <button class="btn btn-primary" onclick="openTypeModal()">+ новый тип</button>
+      </div>
+      <div id="types-list"></div>
+    </div>
+  </main>
+</div>
+
+<button class="fab" onclick="openTrackerAddModal()" title="Добавить баг или апдейт">🐛</button>
+
+<!-- TASK MODAL -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Новая задача</div>
+    <input type="hidden" id="edit-id">
+    <div class="field">
+      <label>Название *</label>
+      <input type="text" id="f-title" placeholder="название задачи">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Статус</label>
+        <select id="f-status">
+          <option value="todo">не начато</option>
+          <option value="wip">в работе</option>
+          <option value="done">готово</option>
+          <option value="blocked">заблокировано</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Приоритет</label>
+        <select id="f-priority">
+          <option value="mid">средний</option>
+          <option value="high">высокий</option>
+          <option value="low">низкий</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Тип задачи</label>
+        <select id="f-type" onchange="onTaskTypeChange()">
+          <option value="">— без типа —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Проект</label>
+        <select id="f-project">
+          <option value="">— без проекта —</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Дедлайн</label>
+      <input type="date" id="f-deadline">
+    </div>
+    <div class="field">
+      <label>Теги</label>
+      <div class="tag-input-wrap" id="tag-input-wrap" onclick="document.getElementById('tag-text').focus()">
+        <input type="text" id="tag-text" placeholder="добавить тег..." onkeydown="handleTagKey(event)">
+      </div>
+    </div>
+    <div class="field">
+      <label>Чеклист</label>
+      <div id="task-checklist-items"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input type="text" id="task-checklist-input" placeholder="добавить пункт..." style="flex:1;padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTaskChecklistItem();}">
+        <button class="btn btn-ghost" onclick="addTaskChecklistItem()" style="padding:8px 12px;">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Заметки</label>
+      <textarea id="f-notes" placeholder="детали..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">отмена</button>
+      <button class="btn btn-primary" onclick="saveTask()">сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- TYPE MODAL -->
+<div class="overlay" id="type-overlay" onclick="if(event.target===this)closeTypeModal()">
+  <div class="modal">
+    <div class="modal-title" id="type-modal-title">Новый тип задачи</div>
+    <input type="hidden" id="type-edit-id">
+    <div class="field">
+      <label>Название типа *</label>
+      <input type="text" id="type-name" placeholder="например: SDTM разработка">
+    </div>
+    <div class="field">
+      <label>Иконка</label>
+      <div class="emoji-picker" id="emoji-picker">
+        <span class="emoji-opt selected" data-emoji="📝" onclick="selectTypeIcon('📝')">📝</span>
+        <span class="emoji-opt" data-emoji="🔬" onclick="selectTypeIcon('🔬')">🔬</span>
+        <span class="emoji-opt" data-emoji="📊" onclick="selectTypeIcon('📊')">📊</span>
+        <span class="emoji-opt" data-emoji="🧪" onclick="selectTypeIcon('🧪')">🧪</span>
+        <span class="emoji-opt" data-emoji="📋" onclick="selectTypeIcon('📋')">📋</span>
+        <span class="emoji-opt" data-emoji="🔍" onclick="selectTypeIcon('🔍')">🔍</span>
+        <span class="emoji-opt" data-emoji="⚙️" onclick="selectTypeIcon('⚙️')">⚙️</span>
+        <span class="emoji-opt" data-emoji="📁" onclick="selectTypeIcon('📁')">📁</span>
+        <span class="emoji-opt" data-emoji="💻" onclick="selectTypeIcon('💻')">💻</span>
+        <span class="emoji-opt" data-emoji="✅" onclick="selectTypeIcon('✅')">✅</span>
+      </div>
+      <input type="hidden" id="type-icon" value="📝">
+    </div>
+    <div class="field">
+      <label>Цвет</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="color-dot selected" data-color="#1D9E75" onclick="selectTypeColor('#1D9E75')" style="background:#1D9E75"></span>
+        <span class="color-dot" data-color="#534AB7" onclick="selectTypeColor('#534AB7')" style="background:#534AB7"></span>
+        <span class="color-dot" data-color="#E05555" onclick="selectTypeColor('#E05555')" style="background:#E05555"></span>
+        <span class="color-dot" data-color="#EF9F27" onclick="selectTypeColor('#EF9F27')" style="background:#EF9F27"></span>
+        <span class="color-dot" data-color="#5CB85C" onclick="selectTypeColor('#5CB85C')" style="background:#5CB85C"></span>
+        <span class="color-dot" data-color="#3498DB" onclick="selectTypeColor('#3498DB')" style="background:#3498DB"></span>
+      </div>
+      <input type="hidden" id="type-color" value="#1D9E75">
+    </div>
+    <div class="field">
+      <label>Шаблон чеклиста</label>
+      <div id="type-checklist-items"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input type="text" id="type-checklist-input" placeholder="пункт чеклиста..." style="flex:1;padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTypeChecklistItem();}">
+        <button class="btn btn-ghost" onclick="addTypeChecklistItem()" style="padding:8px 12px;">+</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeTypeModal()">отмена</button>
+      <button class="btn btn-primary" onclick="saveType()">сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="overlay" id="project-overlay" onclick="if(event.target===this)closeProjectModal()">
+  <div class="modal">
+    <div class="modal-title" id="project-modal-title">Новый проект</div>
+    <input type="hidden" id="project-edit-id">
+    <div class="field">
+      <label>Название проекта *</label>
+      <input type="text" id="p-name" placeholder="например: STUDY-001">
+    </div>
+    <div class="field">
+      <label>Статус</label>
+      <select id="p-status">
+        <option value="active">Активный</option>
+        <option value="completed">Завершён</option>
+        <option value="archived">В архиве</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Цвет</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="color-dot selected" data-color="#1D9E75" onclick="selectProjectColor('#1D9E75')" style="background:#1D9E75"></span>
+        <span class="color-dot" data-color="#534AB7" onclick="selectProjectColor('#534AB7')" style="background:#534AB7"></span>
+        <span class="color-dot" data-color="#E05555" onclick="selectProjectColor('#E05555')" style="background:#E05555"></span>
+        <span class="color-dot" data-color="#EF9F27" onclick="selectProjectColor('#EF9F27')" style="background:#EF9F27"></span>
+        <span class="color-dot" data-color="#5CB85C" onclick="selectProjectColor('#5CB85C')" style="background:#5CB85C"></span>
+        <span class="color-dot" data-color="#3498DB" onclick="selectProjectColor('#3498DB')" style="background:#3498DB"></span>
+      </div>
+      <input type="hidden" id="p-color" value="#1D9E75">
+    </div>
+    <div class="field">
+      <label>Описание</label>
+      <textarea id="p-desc" placeholder="краткое описание..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeProjectModal()">отмена</button>
+      <button class="btn btn-primary" onclick="saveProject()">сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKER ADD MODAL -->
+<div class="overlay" id="tracker-add-overlay" onclick="if(event.target===this)closeTrackerAddModal()">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-title">Что добавить?</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn" style="background:var(--red);color:#fff;padding:14px;justify-content:flex-start;gap:12px;" onclick="closeTrackerAddModal();openBugModal()">
+        <span style="font-size:20px;">🐛</span><span style="font-weight:700">Багрепорт</span>
+      </button>
+      <button class="btn" style="background:var(--purple);color:#fff;padding:14px;justify-content:flex-start;gap:12px;" onclick="closeTrackerAddModal();openUpdateModal()">
+        <span style="font-size:20px;">💡</span><span style="font-weight:700">Апдейт</span>
+      </button>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeTrackerAddModal()">отмена</button></div>
+  </div>
+</div>
+
+<!-- BUG MODAL -->
+<div class="overlay" id="bug-overlay" onclick="if(event.target===this)closeBugModal()">
+  <div class="modal">
+    <div class="modal-title" id="bug-modal-title">Новый багрепорт</div>
+    <input type="hidden" id="bug-edit-id">
+    <div class="field"><label>Заголовок *</label><input type="text" id="b-title" placeholder="что сломалось"></div>
+    <div class="field"><label>Описание</label><textarea id="b-desc" placeholder="подробности..."></textarea></div>
+    <div class="field"><label>Статус</label><select id="b-status"><option value="open">открыт</option><option value="fixed">исправлен</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeBugModal()">отмена</button>
+      <button class="btn btn-red" onclick="saveBug()">сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE MODAL -->
+<div class="overlay" id="update-overlay" onclick="if(event.target===this)closeUpdateModal()">
+  <div class="modal">
+    <div class="modal-title" id="update-modal-title">Новый апдейт</div>
+    <input type="hidden" id="update-edit-id">
+    <div class="field"><label>Заголовок *</label><input type="text" id="u-title" placeholder="что улучшить"></div>
+    <div class="field"><label>Описание</label><textarea id="u-desc" placeholder="подробности..."></textarea></div>
+    <div class="field"><label>Статус</label><select id="u-status"><option value="open">открыт</option><option value="done">выполнен</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeUpdateModal()">отмена</button>
+      <button class="btn" style="background:var(--purple);color:#fff" onclick="saveUpdate()">сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Удалить?</div>
+    <div class="confirm-txt" id="confirm-txt"></div>
+    <div class="confirm-footer">
+      <button class="btn btn-ghost" onclick="closeConfirm()">отмена</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">удалить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let currentFilter = {type: 'status', value: 'all'};
+let activeTagFilters = [];
+let trackerFilter = 'all';
+let deleteId = null, deleteType = null;
+let currentTags = [];
+let currentTaskChecklist = [];
+let currentTypeChecklist = [];
+let selectedTypeIcon = '📝';
+let selectedTypeColor = '#1D9E75';
+let selectedProjectColor = '#1D9E75';
+let searchTimer = null;
+
+// --- API ---
+async function apiFetch(path, opts={}) {
+  const r = await fetch(API + path, {
+    headers: {'Content-Type': 'application/json'},
+    ...opts
+  });
+  if (!r.ok) {
+    const e = await r.json().catch(()=>({}));
+    throw new Error(e.detail || r.statusText);
+  }
+  if (r.status === 204) return null;
+  return r.json();
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function debounceLoad() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    if (document.getElementById('panel-tasks').classList.contains('active')) loadTasks();
+  }, 300);
+}
+
+// --- SIDEBAR ---
+function toggleSection(name) {
+  const body = document.getElementById('section-' + name);
+  const arrow = document.getElementById('arrow-' + name);
+  body.classList.toggle('open');
+  if (arrow) arrow.style.transform = body.classList.contains('open') ? '' : 'rotate(-90deg)';
+}
+
+function toggleSubmenu(name) {
+  const body = document.getElementById('submenu-' + name);
+  const arrow = document.getElementById('arrow-' + name);
+  body.classList.toggle('open');
+  if (arrow) arrow.textContent = body.classList.contains('open') ? '▾' : '▸';
+}
+
+// --- PANELS ---
+function openPanel(name) {
+ ['tasks','tracker','projects','types-manage'].forEach(t => {
+    const el = document.getElementById('panel-'+t);
+    if (el) {
+      el.classList.remove('active');
+      el.style.display = 'none'; // Принудительно скрываем
+    }
+  });
+  
+  // Показываем нужную панель
+  const target = document.getElementById('panel-'+name);
+  if (target) {
+    target.classList.add('active');
+    target.style.display = 'block'; // Показываем
+  }
+  
+  // Снимаем активность с кнопок в боковой панели
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-project').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-type').forEach(t => t.classList.remove('active'));
+  
+  // Загружаем данные для выбранной панели
+  if (name === 'tasks') loadTasks();
+  else if (name === 'tracker') loadTracker();
+  else if (name === 'projects') loadProjects();
+  else if (name === 'types-manage') loadTypesManage();
+}
+
+// --- FILTERS ---
+function setFilter(type, value) {
+  currentFilter = {type, value};
+  activeTagFilters = [];
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-project').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-type').forEach(t => t.classList.remove('active'));
+  const id = value === 'all' ? 'f-all' : 'f-'+value;
+  document.getElementById(id)?.classList.add('active');
+  openPanel('tasks');
+}
+
+function filterByProject(projectId) {
+  currentFilter = {type:'project', value:projectId};
+  activeTagFilters = [];
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-project').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-type').forEach(t => t.classList.remove('active'));
+  openPanel('tasks');
+}
+
+function filterByType(typeId) {
+  currentFilter = {type:'taskType', value:typeId};
+  activeTagFilters = [];
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-project').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-type').forEach(t => t.classList.remove('active'));
+  openPanel('tasks');
+}
+
+function filterByTag(tag) {
+  if (activeTagFilters.includes(tag)) activeTagFilters = activeTagFilters.filter(t=>t!==tag);
+  else activeTagFilters.push(tag);
+  loadTasks();
+}
+
+function clearTagFilters() { activeTagFilters = []; loadTasks(); }
+
+// --- TASKS ---
+async function loadTasks() {
+  if (!document.getElementById('panel-tasks').classList.contains('active')) return;
+  const params = new URLSearchParams();
+  const q = document.getElementById('search-input').value.trim();
+  if (q) params.set('q', q);
+  if (currentFilter.type === 'status' && currentFilter.value !== 'all') params.set('status', currentFilter.value);
+  if (currentFilter.type === 'priority') params.set('priority', currentFilter.value);
+  if (currentFilter.type === 'project') params.set('project_id', currentFilter.value);
+  if (currentFilter.type === 'taskType') params.set('type_id', currentFilter.value);
+  if (activeTagFilters.length) params.set('tag', activeTagFilters[0]); // упрощённо (один тег)
+  const sort = document.getElementById('sort-sel').value;
+
+  try {
+    const [tasks, stats] = await Promise.all([
+      apiFetch('/tasks?' + params),
+      apiFetch('/stats')
+    ]);
+    renderStats(stats);
+    renderTasks(sortTasks(tasks, sort));
+    updateCounters(stats);
+    await renderSidebarProjects();
+    await renderSidebarTypes();
+    renderTagFilters(tasks);
+  } catch(e) {
+    document.getElementById('task-list').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-txt">ошибка загрузки: ${e.message}</div></div>`;
+  }
+}
+
+function sortTasks(tasks, sort) {
+  const pOrder = {high:0,mid:1,low:2};
+  return [...tasks].sort((a,b) => {
+    if (sort === 'priority') return pOrder[a.priority] - pOrder[b.priority];
+    if (sort === 'deadline') {
+      if (!a.deadline && !b.deadline) return 0;
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      return a.deadline.localeCompare(b.deadline);
+    }
+    if (sort === 'title') return a.title.localeCompare(b.title, 'ru');
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+}
+
+function renderStats(s) {
+  document.getElementById('s-total').textContent = s.total;
+  document.getElementById('s-wip').textContent = s.wip;
+  document.getElementById('s-done').textContent = s.done;
+  document.getElementById('s-blocked').textContent = s.blocked;
+}
+
+function updateCounters(s) {
+  document.getElementById('cnt-all').textContent = s.total;
+  document.getElementById('cnt-todo').textContent = s.todo;
+  document.getElementById('cnt-wip').textContent = s.wip;
+  document.getElementById('cnt-done').textContent = s.done;
+  document.getElementById('cnt-blocked').textContent = s.blocked;
+  document.getElementById('cnt-high').textContent = s.high;
+  document.getElementById('cnt-mid').textContent = s.mid;
+  document.getElementById('cnt-low').textContent = s.low;
+  document.getElementById('cnt-all-tasks').textContent = s.total;
+  document.getElementById('cnt-projects').textContent = s.projects_active || 0;
+  document.getElementById('cnt-types').textContent = taskTypes.length || 0;
+  document.getElementById('cnt-tracker').textContent = (s.bugs_total||0) + (s.updates_total||0);
+  document.getElementById('cnt-tracker-all').textContent = (s.bugs_total||0) + (s.updates_total||0);
+  document.getElementById('cnt-bugs').textContent = s.bugs_total || 0;
+  document.getElementById('cnt-updates').textContent = s.updates_total || 0;
+}
+
+function renderTagFilters(tasks) {
+  const allTags = new Set();
+  tasks.forEach(t => (t.tags||[]).forEach(tag => allTags.add(tag.name)));
+  const tw = document.getElementById('tag-filter-wrap');
+  tw.innerHTML = [...allTags].sort().map(t =>
+    `<span class="tag-chip${activeTagFilters.includes(t)?' active':''}" onclick="filterByTag('${esc(t)}')">${esc(t)}</span>`
+  ).join('');
+  if (activeTagFilters.length) tw.innerHTML += `<span class="tag-chip" style="border-color:var(--red);color:var(--red)" onclick="clearTagFilters()">✕ сбросить</span>`;
+}
+
+function renderTasks(tasks) {
+  const el = document.getElementById('task-list');
+  const labels = {all:'все задачи',todo:'не начато',wip:'в работе',done:'готово',blocked:'заблокировано',high:'высокий приоритет',mid:'средний приоритет',low:'низкий приоритет'};
+  if (currentFilter.type === 'project') {
+    const p = projects.find(p => p.id === currentFilter.value);
+    document.getElementById('filter-label').textContent = p ? '📁 '+p.name : 'все задачи';
+  } else if (currentFilter.type === 'taskType') {
+    const t = taskTypes.find(t => t.id === currentFilter.value);
+    document.getElementById('filter-label').textContent = t ? t.icon+' '+t.name : 'все задачи';
+  } else {
+    document.getElementById('filter-label').textContent = labels[currentFilter.value] || 'все задачи';
+  }
+
+  if (!tasks.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div class="empty-txt">задач не найдено</div></div>`;
+    return;
+  }
+
+  el.innerHTML = tasks.map(t => {
+    const taskType = t.type_id ? taskTypes.find(tt => tt.id === t.type_id) : null;
+    const proj = t.project_id ? projects.find(p => p.id === t.project_id) : null;
+    const showProject = currentFilter.type !== 'project' && proj;
+    const showType = currentFilter.type !== 'taskType' && taskType;
+
+    const statusB = {todo:['b-todo','не начато'],wip:['b-wip','в работе'],done:['b-done','готово'],blocked:['b-blocked','заблок']}[t.status]||['b-todo','?'];
+    const priorityB = {high:['b-high','▲'],mid:['b-mid','◆'],low:['b-low','▼']}[t.priority]||['b-mid','?'];
+
+    let deadlineHtml = '';
+    if (t.deadline) {
+      const dt = new Date(t.deadline+'T00:00:00'), today = new Date(); today.setHours(0,0,0,0);
+      const overdue = dt < today && t.status !== 'done';
+      deadlineHtml = `<span class="task-deadline${overdue?' overdue':''}">📅 ${dt.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}</span>`;
+    }
+
+    const checklistHtml = t.checklist && t.checklist.length ? `
+      <div class="task-checklist">
+        <div class="task-checklist-title">Чеклист</div>
+        ${t.checklist.slice(0,4).map((c,i) => `
+          <div class="task-checklist-item ${c.done?'checked':''}" onclick="event.stopPropagation();toggleChecklistItem(${t.id},${i})">
+            <span class="task-checkbox ${c.done?'checked':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+            ${esc(c.text)}
+          </div>
+        `).join('')}
+        ${t.checklist.length > 4 ? `<div style="font-size:11px;color:var(--hint)">+ ещё ${t.checklist.length - 4}</div>` : ''}
+        <div class="checklist-progress">
+          <div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:${Math.round(t.checklist.filter(c=>c.done).length / t.checklist.length * 100)}%"></div></div>
+          <span class="checklist-progress-text">${t.checklist.filter(c=>c.done).length}/${t.checklist.length}</span>
+        </div>
+      </div>
+    ` : '';
+
+    const safeTitle = esc(t.title);
+
+    return `
+    <div class="task-card${t.status==='done'?' done-card':''}">
+      <div>
+        <div class="task-title">${safeTitle}</div>
+        <div class="task-meta">
+          <span class="badge ${statusB[0]}">${statusB[1]}</span>
+          <span class="badge ${priorityB[0]}">${priorityB[1]}</span>
+          ${showType ? `<span class="badge clickable" style="background:${taskType.color}22;color:${taskType.color}" onclick="event.stopPropagation();filterByType(${taskType.id})">${taskType.icon} ${esc(taskType.name)}</span>` : ''}
+          ${showProject ? `<span class="badge clickable" style="background:var(--purple-l);color:var(--purple)" onclick="event.stopPropagation();filterByProject(${proj.id})">📁 ${esc(proj.name)}</span>` : ''}
+          ${deadlineHtml}
+          ${(t.tags||[]).map(tag => `<span class="badge b-tag clickable" onclick="event.stopPropagation();filterByTag('${esc(tag.name)}')">${esc(tag.name)}</span>`).join('')}
+        </div>
+        ${t.notes?`<div class="task-notes-preview">${esc(t.notes)}</div>`:''}
+        ${checklistHtml}
+      </div>
+      <div class="task-actions" onclick="event.stopPropagation()">
+        <button class="icon-btn" title="редактировать" onclick="editTask(${t.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="icon-btn" title="${t.status==='done'?'вернуть':'готово'}" onclick="toggleDone(${t.id},'${t.status}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="icon-btn del" title="удалить" onclick="askDelete(${t.id},'task','${safeTitle}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleChecklistItem(taskId, idx) {
+  try {
+    const tasks = await apiFetch('/tasks?');
+    const t = tasks.find(t => t.id === taskId);
+    if (!t || !t.checklist || !t.checklist[idx]) return;
+    t.checklist[idx].done = !t.checklist[idx].done;
+    await apiFetch(`/tasks/${taskId}`, {method:'PATCH', body:JSON.stringify({checklist: t.checklist})});
+    loadTasks();
+  } catch(e) { showToast('ошибка: '+e.message); }
+}
+
+async function toggleDone(id, status) {
+  try {
+    await apiFetch(`/tasks/${id}`, {method:'PATCH', body:JSON.stringify({status: status==='done'?'todo':'done'})});
+    loadTasks();
+  } catch(e) { showToast('ошибка: '+e.message); }
+}
+
+// --- TASK MODAL ---
+function openModal(task=null) {
+  document.getElementById('modal-title').textContent = task ? 'Редактировать задачу' : 'Новая задача';
+  document.getElementById('edit-id').value = task ? task.id : '';
+  document.getElementById('f-title').value = task ? task.title : '';
+  document.getElementById('f-status').value = task ? task.status : 'todo';
+  document.getElementById('f-priority').value = task ? task.priority : 'mid';
+  document.getElementById('f-deadline').value = task ? (task.deadline||'') : '';
+  document.getElementById('f-notes').value = task ? (task.notes||'') : '';
+
+  const typeSelect = document.getElementById('f-type');
+  typeSelect.innerHTML = '<option value="">— без типа —</option>' + taskTypes.map(t => `<option value="${t.id}">${t.icon} ${esc(t.name)}</option>`).join('');
+  let preselectedType = '';
+  if (task && task.type_id) preselectedType = task.type_id;
+  else if (!task && currentFilter.type === 'taskType') preselectedType = currentFilter.value;
+  typeSelect.value = preselectedType;
+
+  const projSelect = document.getElementById('f-project');
+  projSelect.innerHTML = '<option value="">— без проекта —</option>' + projects.filter(p=>p.status==='active').map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  let preselectedProject = '';
+  if (task && task.project_id) preselectedProject = task.project_id;
+  else if (!task && currentFilter.type === 'project') preselectedProject = currentFilter.value;
+  projSelect.value = preselectedProject;
+
+  currentTags = task ? (task.tags||[]).map(t => t.name) : [];
+  renderTagPills();
+
+  if (task && task.checklist) {
+    currentTaskChecklist = task.checklist.map(c => ({...c}));
+  } else if (!task && preselectedType) {
+    const tt = taskTypes.find(t => t.id == preselectedType);
+    currentTaskChecklist = tt && tt.checklist ? tt.checklist.map(c => ({...c, id: Date.now()+Math.random(), done:false})) : [];
+  } else {
+    currentTaskChecklist = [];
+  }
+  renderTaskChecklistItems();
+
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-title').focus(), 200);
+}
+
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+
+function onTaskTypeChange() {
+  const typeId = document.getElementById('f-type').value;
+  if (!typeId) return;
+  const tt = taskTypes.find(t => t.id == typeId);
+  if (tt && tt.checklist && tt.checklist.length) {
+    if (!currentTaskChecklist.length || confirm('Заменить чеклист шаблоном из типа?')) {
+      currentTaskChecklist = tt.checklist.map(c => ({...c, id: Date.now()+Math.random(), done:false}));
+      renderTaskChecklistItems();
+    }
+  }
+}
+
+async function saveTask() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { document.getElementById('f-title').focus(); return; }
+
+  const id = document.getElementById('edit-id').value;
+  const typeId = document.getElementById('f-type').value;
+  const projectId = document.getElementById('f-project').value;
+
+  const data = {
+    title,
+    status: document.getElementById('f-status').value,
+    priority: document.getElementById('f-priority').value,
+    deadline: document.getElementById('f-deadline').value || null,
+    notes: document.getElementById('f-notes').value.trim() || null,
+    type_id: typeId ? Number(typeId) : null,
+    project_id: projectId ? Number(projectId) : null,
+    checklist: currentTaskChecklist.length ? [...currentTaskChecklist] : null
+  };
+
+  try {
+    let result;
+    if (id) {
+      result = await apiFetch(`/tasks/${id}`, {method:'PATCH', body:JSON.stringify(data)});
+      showToast('задача обновлена');
+    } else {
+      result = await apiFetch('/tasks', {method:'POST', body:JSON.stringify(data)});
+      showToast('задача добавлена');
+    }
+    // Добавляем теги
+    for (const tagName of currentTags) {
+      await apiFetch(`/tasks/${result.id}/tags`, {method:'POST', body:JSON.stringify({name: tagName})});
+    }
+    closeModal();
+    loadTasks();
+  } catch(e) { showToast('ошибка: '+e.message); }
+}
+
+async function editTask(id) {
+  try {
+    const tasks = await apiFetch('/tasks?');
+    const t = tasks.find(t => t.id === id);
+    if (t) openModal(t);
+  } catch(e) {}
+}
+
+// --- TAG INPUT ---
+function renderTagPills() {
+  const wrap = document.getElementById('tag-input-wrap');
+  const input = document.getElementById('tag-text');
+  wrap.querySelectorAll('.tag-pill').forEach(p => p.remove());
+  currentTags.forEach((tag,i) => {
+    const pill = document.createElement('span');
+    pill.className = 'tag-pill';
+    pill.innerHTML = `${esc(tag)}<button onclick="removeTag(${i})" type="button">×</button>`;
+    wrap.insertBefore(pill, input);
+  });
+}
+function removeTag(i) { currentTags.splice(i,1); renderTagPills(); }
+function handleTagKey(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const v = e.target.value.trim();
+    if (v && !currentTags.includes(v)) currentTags.push(v);
+    e.target.value = '';
+    renderTagPills();
+  }
+  if (e.key === 'Backspace' && e.target.value === '' && currentTags.length) { currentTags.pop(); renderTagPills(); }
+}
+
+// --- TASK CHECKLIST ---
+function renderTaskChecklistItems() {
+  const el = document.getElementById('task-checklist-items');
+  if (!currentTaskChecklist.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--hint);padding:8px 0;">Пунктов нет</div>';
+    return;
+  }
+  el.innerHTML = currentTaskChecklist.map((c,i) => `
+    <div class="checklist-item">
+      <span class="drag-handle">⋮⋮</span>
+      <span style="flex:1">${esc(c.text)}</span>
+      <button onclick="removeTaskChecklistItem(${i})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  `).join('');
+}
+function addTaskChecklistItem() {
+  const input = document.getElementById('task-checklist-input');
+  const text = input.value.trim();
+  if (!text) return;
+  currentTaskChecklist.push({id: Date.now(), text, done: false});
+  input.value = '';
+  renderTaskChecklistItems();
+  input.focus();
+}
+function removeTaskChecklistItem(i) { currentTaskChecklist.splice(i,1); renderTaskChecklistItems(); }
+
+// --- TYPES ---
+function openTypeModal(type=null) {
+  document.getElementById('type-modal-title').textContent = type ? 'Редактировать тип' : 'Новый тип задачи';
+  document.getElementById('type-edit-id').value = type ? type.id : '';
+  document.getElementById('type-name').value = type ? type.name : '';
+
+  selectedTypeIcon = type ? type.icon : '📝';
+  document.getElementById('type-icon').value = selectedTypeIcon;
+  document.querySelectorAll('.emoji-opt').forEach(e => e.classList.toggle('selected', e.dataset.emoji === selectedTypeIcon));
+
+  selectedTypeColor = type ? type.color : '#1D9E75';
+  document.getElementById('type-color').value = selectedTypeColor;
+  document.querySelectorAll('#type-overlay .color-dot').forEach(d => d.classList.toggle('selected', d.dataset.color === selectedTypeColor));
+
+  currentTypeChecklist = type && type.checklist ? type.checklist.map(c => ({...c})) : [];
+  renderTypeChecklistItems();
+
+  document.getElementById('type-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('type-name').focus(), 200);
+}
+
+function closeTypeModal() { document.getElementById('type-overlay').classList.remove('open'); }
+
+function selectTypeIcon(emoji) {
+  selectedTypeIcon = emoji;
+  document.getElementById('type-icon').value = emoji;
+  document.querySelectorAll('.emoji-opt').forEach(e => e.classList.toggle('selected', e.dataset.emoji === emoji));
+}
+
+function selectTypeColor(color) {
+  selectedTypeColor = color;
+  document.getElementById('type-color').value = color;
+  document.querySelectorAll('#type-overlay .color-dot').forEach(d => d.classList.toggle('selected', d.dataset.color === color));
+}
+
+function renderTypeChecklistItems() {
+  const el = document.getElementById('type-checklist-items');
+  if (!currentTypeChecklist.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--hint);padding:8px 0;">Пунктов нет</div>';
+    return;
+  }
+  el.innerHTML = currentTypeChecklist.map((c,i) => `
+    <div class="checklist-item">
+      <span class="drag-handle">⋮⋮</span>
+      <span style="flex:1">${esc(c.text)}</span>
+      <button onclick="removeTypeChecklistItem(${i})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  `).join('');
+}
+function addTypeChecklistItem() {
+  const input = document.getElementById('type-checklist-input');
+  const text = input.value.trim();
+  if (!text) return;
+  currentTypeChecklist.push({id: Date.now(), text, done: false});
+  input.value = '';
+  renderTypeChecklistItems();
+  input.focus();
+}
+function removeTypeChecklistItem(i) { currentTypeChecklist.splice(i,1); renderTypeChecklistItems(); }
+
+async function saveType() {
+  const name = document.getElementById('type-name').value.trim();
+  if (!name) { document.getElementById('type-name').focus(); return; }
+
+  const id = document.getElementById('type-edit-id').value;
+  const data = {
+    name,
+    icon: document.getElementById('type-icon').value,
+    color: document.getElementById('type-color').value,
+    checklist: [...currentTypeChecklist]
+  };
+
+  try {
+    if (id) {
+      await apiFetch(`/types/${id}`, {method:'PATCH', body:JSON.stringify(data)});
+      showToast('тип обновлён');
+    } else {
+      await apiFetch('/types', {method:'POST', body:JSON.stringify(data)});
+      showToast('тип создан');
+    }
+    closeTypeModal();
+    loadTypesManage();
+    loadTasks();
+  } catch(e) { showToast('ошибка: '+e.message); }
+}
+
+async function loadTypesManage() {
+  if (!document.getElementById('panel-types-manage').classList.contains('active')) return;
+  try {
+    const types = await apiFetch('/types');
+    const el = document.getElementById('types-list');
+    if (!types.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">🏷️</div><div class="empty-txt">Типов нет</div></div>';
+      return;
+    }
+    el.innerHTML = types.map(t => {
+      const cnt = tasks.filter(task => task.type_id === t.id).length;
+      return `
+      <div class="type-card">
+        <span class="type-icon" style="color:${t.color}">${t.icon}</span>
+        <div class="type-info">
+          <div class="type-name">${esc(t.name)}</div>
+          <div class="type-meta">${t.checklist && t.checklist.length ? `Чеклист: ${t.checklist.length} пунктов` : 'Без чеклиста'} · ${cnt} задач</div>
+        </div>
+        <button class="icon-btn" onclick="editType(${t.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="icon-btn del" onclick="askDelete(${t.id},'type','${esc(t.name)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+      </div>`;
+    }).join('');
+  } catch(e) { showToast('ошибка загрузки типов: '+e.message); }
+}
+
+function editType(id) {
+  const t = taskTypes.find(t => t.id === id);
+  if (t) openTypeModal(t);
+}
+
+// --- PROJECTS ---
+function openProjectModal(project=null) {
+  document.getElementById('project-modal-title').textContent = project ? 'Редактировать проект' : 'Новый проект';
+  document.getElementById('project-edit-id').value = project ? project.id : '';
+  document.getElementById('p-name').value = project ? project.name : '';
+  document.getElementById('p-status').value = project ? project.status : 'active';
+  document.getElementById('p-desc').value = project ? (project.desc||'') : '';
+
+  selectedProjectColor = project ? project.color : '#1D9E75';
+  document.getElementById('p-color').value = selectedProjectColor;
+  document.querySelectorAll('#project-overlay .color-dot').forEach(d => d.classList.toggle('selected', d.dataset.color === selectedProjectColor));
+
+  document.getElementById('project-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('p-name').focus(), 200);
+}
+
+function closeProjectModal() { document.getElementById('project-overlay').classList.remove('open'); }
+
+function selectProjectColor(color) {
+  selectedProjectColor = color;
+  document.getElementById('p-color').value = color;
+  document.querySelectorAll('#project-overlay .color-dot').forEach(d => d.classList.toggle('selected', d.dataset.color === color));
+}
+
+async function saveProject() {
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) { document.getElementById('p-name').focus(); return; }
+
+  const id = document.getElementById('project-edit-id').value;
+  const data = {
+    name,
+    status: document.getElementById('p-status').value,
+    desc: document.getElementById('p-desc').value.trim() || null,
+    color: document.getElementById('p-color').value
+  };
+
+  try {
+    if (id) {
+      await apiFetch(`/projects/${id}`, {method:'PATCH', body:JSON.stringify(data)});
+      showToast('проект обновлён');
+    } else {
+      await apiFetch('/projects', {method:'POST', body:JSON.stringify(data)});
+      showToast('проект создан');
+    }
+    closeProjectModal();
+    loadProjects();
+    loadTasks();
+  } catch(e) { showToast('ошибка: '+e.message); }
+}
+
+async function loadProjects() {
+  if (!document.getElementById('panel-projects').classList.contains('active')) return;
+  try {
+    const projs = await apiFetch('/projects');
+    const el = document.getElementById('project-list');
+    document.getElementById('pr-total').textContent = projs.length;
+    document.getElementById('pr-active').textContent = projs.filter(p=>p.status==='active').length;
+    document.getElementById('pr-completed').textContent = projs.filter(p=>p.status==='completed').length;
+
+    if (!projs.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">📁</div><div class="empty-txt">Проектов нет</div></div>';
+      return;
+    }
+
+    el.innerHTML = projs.map(p => {
+      const pts = tasks.filter(t => t.project_id === p.id);
+      const done = pts.filter(t => t.status === 'done').length;
+      const progress = pts.length ? Math.round(done / pts.length * 100) : 0;
+
+      return `
+      <div class="project-card ${p.status}" style="border-left:4px solid ${p.color||'#1D9E75'}">
+        <div class="project-header">
+          <div>
+            <div class="project-name">${esc(p.name)}</div>
+            <div class="project-meta">
+              <span class="badge ${p.status==='active'?'b-wip':p.status==='completed'?'b-done':'b-todo'}">${p.status==='active'?'активный':p.status==='completed'?'завершён':'архив'}</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px;">
+            <button class="icon-btn" style="color:var(--accent)" onclick="addTaskToProject(${p.id})" title="добавить задачу"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button class="icon-btn" onclick="filterByProject(${p.id})" title="показать задачи"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
+            <button class="icon-btn" onclick="editProject(${p.id})" title="редактировать"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="icon-btn del" onclick="askDelete(${p.id},'project','${esc(p.name)}')" title="удалить"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+          </div>
+        </div>
+        ${p.desc ? `<div class="project-desc">${esc(p.desc)}</div>` : ''}
+        ${pts.length ? `
+          <div class="project-progress">
+            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+            <div class="progress-text">${done}/${pts.length} задач (${progress}%)</div>
+          </div>
+          <div class="project-tasks-preview">
+            ${pts.slice(0,4).map(t => `<div class="mini-task ${t.status==='done'?'done':''}">• ${esc(t.title)}</div>`).join('')}
+            ${pts.length > 4 ? `<div style="font-size:11px;color:var(--hint)">+ ещё ${pts.length - 4}</div>` : ''}
+          </div>
+        ` : '<div style="font-size:12px;color:var(--hint);margin-top:8px;">Нет задач</div>'}
+      </div>`;
+    }).join('');
+  } catch(e) { showToast('ошибка загрузки проектов: '+e.message); }
+}
+
+function editProject(id) {
+  const p = projects.find(p => p.id === id);
+  if (p) openProjectModal(p);
+}
+
+function addTaskToProject(projectId) {
+  openModal();
+  setTimeout(() => { document.getElementById('f-project').value = projectId; }, 50);
+}
+
+// --- SIDEBAR PROJECTS & TYPES ---
+async function renderSidebarProjects() {
+  const el = document.getElementById('sidebar-projects-list');
+  const active = projects.filter(p => p.status === 'active').slice(0,5);
+  if (!active.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--hint);padding:8px 10px;">нет активных</div>';
+    return;
+  }
+  el.innerHTML = active.map(p => {
+    const cnt = tasks.filter(t => t.project_id === p.id).length;
+    const isActive = currentFilter.type === 'project' && currentFilter.value === p.id;
+    return `<div class="sidebar-project ${isActive?'active':''}" onclick="filterByProject(${p.id})">
+      <span class="sidebar-project-dot" style="background:${p.color||'#1D9E75'}"></span>
+      <span class="sidebar-project-name">${esc(p.name)}</span>
+      <span class="sidebar-project-count">${cnt}</span>
+    </div>`;
+  }).join('');
+}
+
+async function renderSidebarTypes() {
+  const el = document.getElementById('sidebar-types-list');
+  const types = await apiFetch('/types');
+  el.innerHTML = types.slice(0,6).map(t => {
+    const cnt = tasks.filter(task => task.type_id === t.id).length;
+    const isActive = currentFilter.type === 'taskType' && currentFilter.value === t.id;
+    return `<div class="sidebar-type ${isActive?'active':''}" onclick="filterByType(${t.id})">
+      <span>${t.icon}</span><span class="sidebar-type-name">${esc(t.name)}</span><span class="sidebar-type-count">${cnt}</span>
+    </div>`;
+  }).join('');
+}
+
+// --- TRACKER ---
+function setTrackerFilter(f) {
+  trackerFilter = f;
+  ['all','bug','update'].forEach(id => document.getElementById('tf-'+id)?.classList.toggle('active', id===f));
+  loadTracker();
+}
+
+function openTrackerAddModal() { document.getElementById('tracker-add-overlay').classList.add('open'); }
+function closeTrackerAddModal() { document.getElementById('tracker-add-overlay').classList.remove('open'); }
+
+function openBugModal(bug=null) {
+  document.getElementById('bug-modal-title').textContent = bug ? 'Редактировать баг' : 'Новый багрепорт';
+  document.getElementById('bug-edit-id').value = bug ? bug.id : '';
+  document.getElementById('b-title').value = bug ? bug.title : '';
+  document.getElementById('b-desc').value = bug ? (bug.desc||'') : '';
+  document.getElementById('b-status').value = bug ? bug.status : 'open';
+  document.getElementById('bug-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('b-title').focus(), 200);
+}
+function closeBugModal() { document.getElementById('bug-overlay').classList.remove('open'); }
+
+async function saveBug() {
+  const title = document.getElementById('b-title').value.trim();
+  if (!title) { document.getElementById('b-title').focus(); return; }
+  const id = document.getElementById('bug-edit-id').value;
+  const data = {title, desc: document.getElementById('b-desc').value.trim() || null, status: document.getElementById('b-status').value};
+  try {
+    if (id) {
+      await apiFetch(`/bugs/${id}`, {method:'PATCH', body:JSON.stringify(data)});
+      showToast('баг обновлён');
+    } else {
+      await apiFetch('/bugs', {method:'POST', body:JSON.stringify(data)});
+      showToast('баг добавлен');
+    }
+    closeBugModal();
+    loadTracker();
+  } catch(e) { showToast('ошибка: '+e.message); }
+}
+
+function openUpdateModal(upd=null) {
+  document.getElementById('update-modal-title').textContent = upd ? 'Редактировать апдейт' : 'Новый апдейт';
+  document.getElementById('update-edit-id').value = upd ? upd.id : '';
+  document.getElementById('u-title').value = upd ? upd.title : '';
+  document.getElementById('u-desc').value = upd ? (upd.desc||'') : '';
+  document.getElementById('u-status').value = upd ? upd.status : 'open';
+  document.getElementById('update-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('u-title').focus(), 200);
+}
+function closeUpdateModal() { document.getElementById('update-overlay').classList.remove('open'); }
+
+async function saveUpdate() {
+  const title = document.getElementById('u-title').value.trim();
+  if (!title) { document.getElementById('u-title').focus(); return; }
+  const id = document.getElementById('update-edit-id').value;
+  const data = {title, desc: document.getElementById('u-desc').value.trim() || null, status: document.getElementById('u-status').value};
+  try {
+    if (id) {
+      await apiFetch(`/updates/${id}`, {method:'PATCH', body:JSON.stringify(data)});
+      showToast('апдейт обновлён');
+    } else {
+      await apiFetch('/updates', {method:'POST', body:JSON.stringify(data)});
+      showToast('апдейт добавлен');
+    }
+    closeUpdateModal();
+    loadTracker();
+  } catch(e) { showToast('ошибка: '+e.message); }
+}
+
+async function loadTracker() {
+  if (!document.getElementById('panel-tracker').classList.contains('active')) return;
+  try {
+    const [bugs, updates] = await Promise.all([
+      apiFetch('/bugs'),
+      apiFetch('/updates')
+    ]);
+    const all = [...bugs.map(b=>({...b,_type:'bug'})), ...updates.map(u=>({...u,_type:'update'}))].sort((a,b)=>b.created_at - a.created_at);
+    let list = all;
+    if (trackerFilter === 'bug') list = all.filter(i => i._type === 'bug');
+    if (trackerFilter === 'update') list = all.filter(i => i._type === 'update');
+
+    document.getElementById('tr-total').textContent = all.length;
+    document.getElementById('tr-bugs').textContent = bugs.length;
+    document.getElementById('tr-updates').textContent = updates.length;
+
+    const el = document.getElementById('tracker-list');
+    if (!list.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div class="empty-txt">Пусто</div></div>';
+      return;
+    }
+
+    el.innerHTML = list.map(i => {
+      const isBug = i._type === 'bug';
+      const isDone = i.status === 'fixed' || i.status === 'done';
+      return `
+      <div class="bug-card${isDone?' fixed':''}">
+        <div>
+          <div class="bug-title">${esc(i.title)}</div>
+          <div class="bug-meta">
+            <span class="badge" style="background:${isBug?'var(--red-l)':'var(--purple-l)'};color:${isBug?'var(--red)':'var(--purple)'}">${isBug?'🐛 баг':'💡 апдейт'}</span>
+            <span class="badge ${isDone?'b-done':'b-wip'}">${isDone?(isBug?'исправлен':'выполнен'):'открыт'}</span>
+          </div>
+          ${i.desc?`<div class="bug-desc">${esc(i.desc)}</div>`:''}
+        </div>
+        <div class="task-actions">
+          <button class="icon-btn" onclick="${isBug?`editBug(${i.id})`:`editUpdate(${i.id})`}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="icon-btn" onclick="${isBug?`toggleBug(${i.id})`:`toggleUpdate(${i.id})`}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+          <button class="icon-btn del" onclick="askDelete(${i.id},'${isBug?'bug':'update'}','${esc(i.title)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { showToast('ошибка загрузки трекера: '+e.message); }
+}
+
+function editBug(id) {
+  // Упрощённо: получаем баг по id и открываем модалку
+  fetch(`/api/bugs/${id}`).then(r=>r.json()).then(bug => openBugModal(bug));
+}
+function editUpdate(id) {
+  fetch(`/api/updates/${id}`).then(r=>r.json()).then(upd => openUpdateModal(upd));
+}
+function toggleBug(id) {
+  fetch(`/api/bugs/${id}`).then(r=>r.json()).then(b => {
+    fetch(`/api/bugs/${id}`, {method:'PATCH', body:JSON.stringify({status: b.status==='fixed'?'open':'fixed'})})
+      .then(() => loadTracker());
+  });
+}
+function toggleUpdate(id) {
+  fetch(`/api/updates/${id}`).then(r=>r.json()).then(u => {
+    fetch(`/api/updates/${id}`, {method:'PATCH', body:JSON.stringify({status: u.status==='done'?'open':'done'})})
+      .then(() => loadTracker());
+  });
+}
+
+// --- DELETE ---
+function askDelete(id, type, title) {
+  deleteId = id; deleteType = type;
+  document.getElementById('confirm-txt').textContent = '"'+title+'" — это нельзя отменить.';
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+function closeConfirm() { document.getElementById('confirm-overlay').classList.remove('open'); deleteId = null; deleteType = null; }
+
+async function confirmDelete() {
+  if (!deleteId) return;
+  try {
+    if (deleteType === 'task') {
+      await apiFetch(`/tasks/${deleteId}`, {method:'DELETE'});
+      showToast('задача удалена');
+      loadTasks();
+    } else if (deleteType === 'project') {
+      await apiFetch(`/projects/${deleteId}`, {method:'DELETE'});
+      showToast('проект удалён');
+      loadProjects();
+    } else if (deleteType === 'type') {
+      await apiFetch(`/types/${deleteId}`, {method:'DELETE'});
+      showToast('тип удалён');
+      loadTypesManage();
+    } else if (deleteType === 'bug') {
+      await apiFetch(`/bugs/${deleteId}`, {method:'DELETE'});
+      showToast('баг удалён');
+      loadTracker();
+    } else if (deleteType === 'update') {
+      await apiFetch(`/updates/${deleteId}`, {method:'DELETE'});
+      showToast('апдейт удалён');
+      loadTracker();
+    }
+    closeConfirm();
+  } catch(e) { showToast('ошибка: '+e.message); }
+}
+
+// --- INIT ---
+let tasks = [], projects = [], taskTypes = [];
+
+async function loadAllData() {
+  try {
+    [tasks, projects, taskTypes] = await Promise.all([
+      apiFetch('/tasks?'),
+      apiFetch('/projects'),
+      apiFetch('/types')
+    ]);
+    const stats = await apiFetch('/stats');
+    updateCounters(stats);
+    await renderSidebarProjects();
+    await renderSidebarTypes();
+    // Открываем панель проектов по умолчанию
+    openPanel('projects');
+  } catch(e) {
+    showToast('Ошибка загрузки данных: '+e.message);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal(); closeProjectModal(); closeTypeModal(); closeBugModal(); closeUpdateModal(); closeConfirm(); closeTrackerAddModal();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (document.getElementById('overlay').classList.contains('open')) saveTask();
+    if (document.getElementById('project-overlay').classList.contains('open')) saveProject();
+    if (document.getElementById('type-overlay').classList.contains('open')) saveType();
+    if (document.getElementById('bug-overlay').classList.contains('open')) saveBug();
+    if (document.getElementById('update-overlay').classList.contains('open')) saveUpdate();
+  }
+});
+
+loadAllData();
+</script>
+</body>
+</html>
