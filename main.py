@@ -1,65 +1,81 @@
-from aiogram import Bot, Dispatcher, types, executor
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-import datetime
+import asyncio
+import logging
+from datetime import timedelta
+from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.redis import RedisStorage
+from aiogram.types import ErrorEvent
+from config import settings
+from handlers import start, projects, tasks, my_tasks, search, filters, export, invite, cancel
+from middlewares.auth import AuthMiddleware
+from scheduler.notifications import setup_scheduler
+from db.base import engine, Base
 
-API_TOKEN = 'ВАШ_ТОКЕН'
-
-bot = Bot(token=8520139035:AAGIDs_BwkIOxcOxQSxrudX1htQ1kw4x06I)
-dp = Dispatcher(bot)
-
-# Хранилище сообщений {дата: set([сообщения])}
-storage = {}
-
-@dp.message_handler()
-async def handle_message(message: types.Message):
-    user_text = message.text
-    # Сохраняем текст во временный контекст пользователя
-    dp.current_state(user=message.from_user.id).update_data(last_text=user_text)
-    # Предлагаем выбрать дату через клавиатуру
-    markup = ReplyKeyboardMarkup(resize_keyboard=True)
-    today = datetime.date.today()
-    for i in range(7):
-        date_btn = KeyboardButton((today + datetime.timedelta(days=i)).strftime('%d.%m.%Y'))
-        markup.add(date_btn)
-    await message.answer('На какую дату сохранить?', reply_markup=markup)
-
-@dp.message_handler(lambda msg: valid_date(msg.text))
-async def handle_date(message: types.Message):
-    selected_date = message.text
-    data = await dp.current_state(user=message.from_user.id).get_data()
-    last_text = data.get('last_text')
-    if selected_date not in storage:
-        storage[selected_date] = set()
-    storage[selected_date].add(last_text)
-    await message.answer(f'Сохранено на {selected_date}?')
-
-@dp.message_handler(commands=['список'])
-async def handle_list(message: types.Message):
-    markup = ReplyKeyboardMarkup(resize_keyboard=True)
-    for date in storage.keys():
-        markup.add(KeyboardButton(date))
-    await message.answer('Выбери дату:', reply_markup=markup)
-
-@dp.message_handler(commands=['все'])
-async def handle_all_list(message: types.Message):
-    all_items = set()
-    for items in storage.values():
-        all_items.update(items)
-    await message.answer('Все записи:\n' + '\n'.join(all_items))
-
-@dp.message_handler(lambda msg: msg.text in storage.keys())
-async def handle_show_date_list(message: types.Message):
-    selected_date = message.text
-    items = storage.get(selected_date, [])
-    await message.answer(f'Записи на {selected_date}:\n' + '\n'.join(items))
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+# Снижаем уровень aiogram чтобы не логировать тела сообщений (токены в deep link)
+logging.getLogger("aiogram").setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
 
 
-def valid_date(text):
+async def main():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    # FIX P9/S11: TTL для FSM состояний + не логируем токены
+    storage = RedisStorage.from_url(
+        settings.REDIS_URL,
+        state_ttl=timedelta(hours=24),
+        data_ttl=timedelta(hours=24),
+    )
+    bot = Bot(token=settings.BOT_TOKEN)
+    dp = Dispatcher(storage=storage)
+
+    # ── Глобальный error handler (Rel-1) ──────────────────────────────────────
+    @dp.error()
+    async def error_handler(event: ErrorEvent) -> None:
+        logger.exception("Unhandled error: %s", event.exception)
+        try:
+            if event.update.message:
+                await event.update.message.answer(
+                    "⚠️ Произошла ошибка. Попробуй снова или нажми /start."
+                )
+            elif event.update.callback_query:
+                await event.update.callback_query.answer(
+                    "⚠️ Ошибка. Попробуй снова.", show_alert=True
+                )
+        except Exception:
+            pass
+
+    dp.message.middleware(AuthMiddleware())
+    dp.callback_query.middleware(AuthMiddleware())
+
+    # /cancel — глобально, РАНЬШЕ всех FSM-роутеров
+    dp.include_router(cancel.router)
+
+    # FIX P9: invite.router ПЕРВЫМ — перехватывает CommandStart(deep_link=True)
+    # до того как start.router обработает CommandStart()
+    dp.include_router(invite.router)
+    dp.include_router(start.router)
+    dp.include_router(projects.router)
+    dp.include_router(tasks.router)
+    dp.include_router(my_tasks.router)
+    dp.include_router(search.router)
+    dp.include_router(filters.router)
+    dp.include_router(export.router)
+
+    scheduler = setup_scheduler(bot)
+    scheduler.start()
+    logger.info("Bot started")
+
     try:
-        datetime.datetime.strptime(text, '%d.%m.%Y')
-        return True
-    except:
-        return False
+        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+    finally:
+        scheduler.shutdown()
+        await bot.session.close()
+        logger.info("Bot stopped")
 
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+
+if __name__ == "__main__":
+    asyncio.run(main())
